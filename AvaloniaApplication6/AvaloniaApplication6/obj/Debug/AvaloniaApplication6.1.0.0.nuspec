@@ -1,0 +1,22 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2012/06/nuspec.xsd">
+  <metadata>
+    <id>AvaloniaApplication6</id>
+    <version>1.0.0</version>
+    <authors>AvaloniaApplication6</authors>
+    <description>Package Description</description>
+    <dependencies>
+      <group targetFramework="net6.0">
+        <dependency id="Avalonia" version="11.0.0" exclude="Build,Analyzers" />
+        <dependency id="Avalonia.Desktop" version="11.0.0" exclude="Build,Analyzers" />
+        <dependency id="Avalonia.Diagnostics" version="11.0.0" exclude="Build,Analyzers" />
+        <dependency id="Avalonia.Fonts.Inter" version="11.0.0" exclude="Build,Analyzers" />
+        <dependency id="Avalonia.Themes.Fluent" version="11.0.0" exclude="Build,Analyzers" />
+      </group>
+    </dependencies>
+  </metadata>
+  <files>
+    <file src="C:\Users\steri\source\repos\AvaloniaApplication6\AvaloniaApplication6\bin\Debug\net6.0\AvaloniaApplication6.runtimeconfig.json" target="lib\net6.0\AvaloniaApplication6.runtimeconfig.json" />
+    <file src="C:\Users\steri\source\repos\AvaloniaApplication6\AvaloniaApplication6\bin\Debug\net6.0\AvaloniaApplication6.dll" target="lib\net6.0\AvaloniaApplication6.dll" />
+  </files>
+</package>
