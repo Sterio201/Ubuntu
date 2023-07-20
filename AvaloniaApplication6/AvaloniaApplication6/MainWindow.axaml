@@ -12,11 +12,6 @@
 		</Grid.RowDefinitions>
 
 		<Grid>
-			<!-- в отличие от WPF, в Avalonia Column/RowDefinitions можно записывать опрятнее и короче-->
-			<!-- <Grid ColumnDefinitions="*, Auto"> -->
-				<!-- ... -->
-			<!-- </Grid> -->
-			
 			<Grid.ColumnDefinitions>
 				<ColumnDefinition Width="*" />
 				<ColumnDefinition Width="Auto" />

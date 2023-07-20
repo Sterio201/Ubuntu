@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "hvz+qWC294tPqpHph3+yxXYVakVzd6aT1Oe97rAnQbWMxDS1reIQ2Eq3Wb7angpnREUGoAXkIFYo+XMaOUM9pw==",
+  "dgSpecHash": "TLL7x6FQYVXDbGEr/Lw6mtwcrLpFQAZIuEpIbGSsiW3GJ4temTcmYIYdOPv3bvpgVG2exaF9Ad/4ln5ttDxzxw==",
   "success": true,
-  "projectFilePath": "C:\\Users\\steri\\source\\repos\\AvaloniaApplication6\\AvaloniaApplication6\\AvaloniaApplication6.csproj",
+  "projectFilePath": "C:\\Users\\steri\\source\\repos\\Ubuntu\\AvaloniaApplication6\\AvaloniaApplication6\\AvaloniaApplication6.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\steri\\.nuget\\packages\\avalonia\\11.0.0\\avalonia.11.0.0.nupkg.sha512",
     "C:\\Users\\steri\\.nuget\\packages\\avalonia.angle.windows.natives\\2.1.0.2023020321\\avalonia.angle.windows.natives.2.1.0.2023020321.nupkg.sha512",

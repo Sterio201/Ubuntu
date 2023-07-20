@@ -1,171 +1,143 @@
-using Avalonia;
+﻿using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
 using Avalonia.Markup.Xaml;
 using Avalonia.Media;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Linq;
 
 namespace AvaloniaApplication6
 {
-    public partial class MainWindow : Window
+    public partial class MainWindow : Window, INotifyPropertyChanged
     {
-        // имена переменных с _
-        private TextBox textBox;
-        private ListBox listBox;
-        private Button searchButton;
-        private Button deleteButton;
-        private Button addButton;
-        private Label warningLabel;
-
-        // лучше использовать ObservableCollection и очищать/заполнять её. Тогда ListBox будет сам
-        // перерисовывать любые изменения
-        List<OutputProcess> allProcesses;
-        OutputProcess selectedProcess;
+        public ObservableCollection<ServiceInfo> _allProcesses;
+        public ServiceInfo _selectedService;
+        public ServicesWork _serviceWorsk;
 
         public MainWindow()
         {
             InitializeComponent();
 
-            // Avalonia генерирует поля для именованных элементов, поэтому можешь смело обращаться к
-            // TextInt. и остальным элементам
-            textBox = this.Find<TextBox>("TextInt");
-            listBox = this.Find<ListBox>("MainListBox");
-            searchButton = this.Find<Button>("Search");
-            deleteButton = this.Find<Button>("Delete");
-            addButton = this.Find<Button>("Add");
-            warningLabel = this.Find<Label>("Warning");
-            
-            // MainListBox.SelectionChanged += ...
-            listBox.SelectionChanged += MainListBox_SelectionChanged;
-            searchButton.Click += SearchMethod;
-            deleteButton.Click += DeleteClick;
-            addButton.Click += AddClick;
+            this.DataContext = this;
 
-            // долгоиграющее действие внутри конструктора - очень не хорошая вещь
-            allProcesses = Services.GetProcesses();
-            AddOutputProcesses(allProcesses);
+            MainListBox.SelectionChanged += MainListBox_SelectionChanged;
+            Search.Click += SearchMethod;
+            Delete.Click += OnDeleteClick;
+            Add.Click += AddClick;
+
+            _allProcesses = new ObservableCollection<ServiceInfo>();
+            _serviceWorsk = new ServicesWork();
         }
 
         private void SearchMethod(object? sender, RoutedEventArgs e)
         {
-            // вмето двух .ToLower() мог бы использовать IgnoreCase поиск
-            // и поправь кодировку комментариев. в C# весь код должен быть в UTF-8
-            string searchText = textBox.Text.ToLower(); // �������� ��������� ����� � �������� � ������� ��������
+            string searchText = TextInt.Text;
 
-            listBox.Items.Clear(); // ������� ListBox ����� ����������� ����� ���������
+            MainListBox.Items.Clear();
 
             if (string.IsNullOrWhiteSpace(searchText))
             {
-                // ���� ������ ������ ������, ���������� ���� ������ �����
-                AddOutputProcesses(allProcesses);
+                AddOutputProcesses(_allProcesses);
             }
             else
             {
-                // ��������� ������ ����� �� ���������� ������
-                List<OutputProcess> filteredProcesses = allProcesses
-                    // а если я хочу найти сервис по куску строки где-то посередине?
-                    // лучше используй .Contains(searchText, StringComparison.Ordinal или InvariantCultureIgnoreCase)
-                    .Where(p => p.Name.ToLower().StartsWith(searchText))
-                    .ToList();
+                ObservableCollection<ServiceInfo> filteredProcesses = new ObservableCollection<ServiceInfo>
+                    (_allProcesses.Where(p => p.Name.Contains(searchText, StringComparison.OrdinalIgnoreCase)));
 
                 AddOutputProcesses(filteredProcesses);
             }
         }
 
-        // методы, обрабатывающие события, лучше называть OnDeleteClick или ProcessDeleteClick. Опять таки ради
-        // лучшей семантики
-        private void DeleteClick(object? sender, RoutedEventArgs e)
+        private void OnDeleteClick(object? sender, RoutedEventArgs e)
         {
-            listBox.Items.Clear();
+            MainListBox.Items.Clear();
 
-            // чтобы избежать ошибок с литералами строк, лучше статус парсить в какой-нибудь Enum и проверять затем
-            // по значениям. Так ты сведешь человеческий фактор к минимуму и в случае обновлений/исправлений ошибок,
-            // нужно будет исправить это только в 1 месте, там, где парсишь
-            if (selectedProcess.StatusDownload != "not-found" && selectedProcess.StatusActive != "failed")
+            if (_selectedService.StatusDownload != Status.not_found && _selectedService.StatusActive != Status.failed)
             {
-                Services.DeleteProcess(selectedProcess.Name);
+                _serviceWorsk.InactivateServices(_selectedService.Name);
 
-                selectedProcess.StatusActive = "inactive";
-                allProcesses[selectedProcess.id] = selectedProcess;
+                _selectedService.StatusActive = Status.inactive;
+                _allProcesses[_selectedService.Id] = _selectedService;
             }
-            else 
+            else
             {
-                warningLabel.Content = "Error, service not found";
+                Warning.Content = "Error, service not found";
             }
 
-            textBox.Text = "";
+            TextInt.Text = "";
 
-            AddOutputProcesses(allProcesses);
-            deleteButton.IsEnabled = false;
+            AddOutputProcesses(_allProcesses);
+            Delete.IsEnabled = false;
         }
 
         private void AddClick(object? sender, RoutedEventArgs e)
         {
-            listBox.Items.Clear();
+            MainListBox.Items.Clear();
 
-            if (selectedProcess.StatusDownload != "not-found" && selectedProcess.StatusActive != "failed")
+            if (_selectedService.StatusDownload != Status.not_found && _selectedService.StatusActive != Status.failed)
             {
-                Services.CreateProcess(selectedProcess.Name);
+                _serviceWorsk.ActivateServices(_selectedService.Name);
 
-                selectedProcess.StatusActive = "active";
-                allProcesses[selectedProcess.id] = selectedProcess;
+                _selectedService.StatusActive = Status.active;
+                _allProcesses[_selectedService.Id] = _selectedService;
             }
-            else if (selectedProcess.DopStatus == "death") 
+            else if (_selectedService.DopStatus == Status.dead)
             {
-                // можно заменить на диалоги с ошибками
-                warningLabel.Content = "Error, the service cannot be started";
+                Warning.Content = "Error, the service cannot be started";
             }
             else
             {
-                warningLabel.Content = "Error, service not found";
+                Warning.Content = "Error, service not found";
             }
 
-            textBox.Text = "";
+            TextInt.Text = "";
 
-            AddOutputProcesses(allProcesses);
-            addButton.IsEnabled = false;
+            AddOutputProcesses(_allProcesses);
+            Add.IsEnabled = false;
         }
 
-        private void AddOutputProcesses(List<OutputProcess> processes)
+        public void AddOutputProcesses(ObservableCollection<ServiceInfo> processes)
         {
-            foreach (OutputProcess process in processes)
+            foreach (ServiceInfo process in processes)
             {
-                listBox.Items.Add(process);
+                process.Name = ConvertName(process.Name, 20);
+                MainListBox.Items.Add(process);
             }
         }
 
         private void MainListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            // очень много делаешь вручную. Я бы перевел всё на свойства, которые понимают, когда кнопка должна быть
-            // включена, а когда выключена 
-            deleteButton.IsEnabled = false;
-            addButton.IsEnabled = false;
+            Delete.IsEnabled = false; Add.IsEnabled = false;
 
-            warningLabel.Content = "";
+            Warning.Content = "";
 
-            if (listBox.SelectedItem != null)
+            if (MainListBox.SelectedItem != null)
             {
-                selectedProcess = (OutputProcess)listBox.SelectedItem;
-                if (selectedProcess.StatusActive == "active")
+                _selectedService = (ServiceInfo)MainListBox.SelectedItem;
+                if (_selectedService.StatusActive == Status.active)
                 {
-                    deleteButton.IsEnabled = true;
+                    Delete.IsEnabled = true;
                 }
-                else if (selectedProcess.StatusActive == "inactive") 
+                else if (_selectedService.StatusActive == Status.inactive)
                 {
-                    addButton.IsEnabled = true;
+                    Add.IsEnabled = true;
                 }
-            }
-            else
-            {
-                deleteButton.IsEnabled = false;
             }
         }
 
-        private void InitializeComponent()
+        string ConvertName(string name, int maxSize)
         {
-            AvaloniaXamlLoader.Load(this);
+            if (name.Length <= maxSize)
+            {
+                return name;
+            }
+            else
+            {
+                return name.Substring(0, maxSize);
+            }
         }
     }
 }
